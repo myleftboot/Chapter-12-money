@@ -1,0 +1,229 @@
+<h1>InAppBilling Module</h1>
+<h2>Description</h2>
+<p>The InAppBilling module allows you to access the Android In-App Billing mechanism. </p>
+<h2>Getting Started</h2>
+<p>View the <a href="http://docs.appcelerator.com/titanium/latest/#!/guide/Using_Titanium_Modules">Using Titanium Modules</a> document for instructions on getting
+started with using this module in your application.</p>
+<p>Note that there may be two versions of this module available to you, one for use with pre-1.8.0.1 SDKs and one for use with 1.8.0.1 or newer.
+In your tiapp.xml file, make sure that you specify the version of the module that corresponds to the version of Titanium Mobile SDK that you are targeting.
+For Appcelerator modules, specify the 1.X version of the module if building for versions of Titanium Mobile SDK prior to 1.8.0.1 and specify the 2.X version of the module if
+building for versions of Titanium Mobile SDK 1.8.0.1 or newer.</p>
+<p>The In-App Billing process using this module is as follows:</p>
+<p>First you must call startBillingService(), this initializes the process. Two events are fired from 
+this call: ON_BIND_EVENT and ON_CONNECT_EVENT. Once the ON_CONNECT_EVENT has fired, the module is ready 
+to send requests to the Android Market. There are 5 different request methods:</p>
+<pre><code>-checkBillingSupported()
+-requestPurchase()
+-getPurchaseInformation()
+-confirmNotifications() 
+-restoreTransactions()
+</code></pre>
+<p>These methods each return a synchronous response object when called.</p>
+<p>Three events can be fired in response to these requests:</p>
+<pre><code>RESPONSE_EVENT 
+PURCHASE_STATE_CHANGED_EVENT
+NOTIFY_EVENT.
+</code></pre>
+<p>To use the Signature Verification code included in the module, you must also set the Public Key using</p>
+<p>-setPublicKey()</p>
+<p>If this is not set, the process will function but will not internally verify any Market responses. </p>
+<h2>Accessing the InAppBilling Module</h2>
+<p>To access this module from JavaScript, you would do the following:</p>
+<pre><code>var InAppBilling = require('ti.inappbilling');
+</code></pre>
+<p>The InAppBilling variable is a reference to the Module object.</p>
+<h2>Deprecated since version 2.2.0</h2>
+<p>Using the <code>RESPONSE_EVENT</code> eventListener to get the synchronous response from each method call is deprecated and will be removed. Use the event object that the method returns.</p>
+<h2>Methods</h2>
+<h3>startBillingService()</h3>
+<p>Initializes the Billing Service which will be used to send messages to the Android Market.
+When the Billing Service is bound to the Market Service, an ON_BIND_EVENT e is fired. When the Billing Service 
+connects to the Market service, an ON_CONNECT_EVENT is fired, and the Billing Service can now be used for other requests. 
+This MUST be called before any of the 5 request functions. </p>
+<h4>Example</h4>
+<pre><code>InAppBilling.startBillingService();
+</code></pre>
+<h3>object checkBillingSupported(productType)</h3>
+<p>Sends a Check Billing Supported request to the Market returning a response object. 
+This request will not trigger any asynchronous responses. </p>
+<p>Arg must be a <code>productType</code> constant:</p>
+<pre><code>ITEM_TYPE_INAPP (default if no productType specified)   ITEM_TYPE_SUBSCRIPTION
+</code></pre>
+<p>It is possible for a device to only support in-app products and not subscriptions, but if subscriptions is supported then in-app products are supported as well.</p>
+<h4>Example</h4>
+<pre><code>InAppBilling.checkBillingSupported(InAppBilling.ITEM_TYPE_SUBSCRIPTION);
+</code></pre>
+<h3>object requestPurchase(options)</h3>
+<p>Sends a Request Purchase request to the Market, for the specified productId with the specified (optional) 
+developerPayload. This will prompt the Android Market Confirmation window to appear for the specified product. 
+This method will return a response object. </p>
+<p>This request will trigger two asynchronous responses: one NOTIFY_EVENT and one RESPONSE_EVENT. </p>
+<ul>
+<li>options[object]: An object that specifies what product to purchase. <ul>
+<li>The 'productId' property is required. </li>
+<li>'productType' can be set to<ul>
+<li>ITEM_TYPE_INAPP - Standard in-app product (default if no productType specified).</li>
+<li>ITEM_TYPE_SUBSCRIPTION - Recurring monthly or annual billing product.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4>Example</h4>
+<pre><code>InAppBilling.requestPurchase({
+    productId: 'test_product_1',
+    productType: InAppBilling.ITEM_TYPE_INAPP,
+    developerPayload: devPayload
+});
+</code></pre>
+<h3>object getPurchaseInformation(options)</h3>
+<p>Sends a Get Purchase Information request to market, for the specified String notificationIds. This should
+be called after an In-App Notify response is received, and will request more detailed transaction information. 
+This method will return a response object. </p>
+<p>This request will trigger two asynchronous responses: one PURCHASE_STATE_CHANGED_EVENT and one RESPONSE_EVENT.</p>
+<ul>
+<li>options[object]: An object that specifies what purchase information to get. The 'notificationIds' property is required.</li>
+</ul>
+<h4>Example</h4>
+<pre><code>InAppBilling.getPurchaseInformation({
+    notificationIds: [e.notifyId]
+});
+</code></pre>
+<h3>object confirmNotifications(options)</h3>
+<p>Sends a Confirm Notifications request to the market, for the specified String notificationIds. This is called
+to confirm with the Market the delivery of the purchases signified by the notificationIds passed in. 
+This method will return a response object.<br />
+</p>
+<ul>
+<li>options[object]: An object that specifies what notificationIds to get Confirm Notifications for. The 'notificationIds' property is required.</li>
+</ul>
+<h4>Example</h4>
+<pre><code>InAppBilling.confirmNotifications({
+            notificationIds: [response.orders[0].notificationId]
+        });
+</code></pre>
+<h3>object restoreTransactions()</h3>
+<p>Sends a restore Transactions request to the market. This will deliver the user's transaction history
+for purchases with this application. Should be called only when the application is installed/re-installed. 
+This method will return a response object. </p>
+<p>This request will trigger two asynchronous responses: one PURCHASE_STATE_CHANGED_EVENT and one RESPONSE_EVENT.</p>
+<h4>Example</h4>
+<pre><code>InAppBilling.restoreTransactions();
+</code></pre>
+<h3>setPublicKey(publicKey)</h3>
+<p>Sets the key to be used for signature verification (Key is found in Android Market profile information).</p>
+<p>For security reasons the key should not be added as a complete string, it should be built from several different strings.</p>
+<h4>Example</h4>
+<pre><code>InAppBilling.setPublicKey('&lt;&lt; YOUR KEY HERE &gt;&gt;');
+</code></pre>
+<h2>Properties</h2>
+<h3>InAppBilling.SUCCESS <a href="read-only">int</a></h3>
+<pre><code>Success state in Billing Service binding.
+</code></pre>
+<h3>InAppBilling.FAILED <a href="read-only">int</a></h3>
+<pre><code>Fail state in Billing Service binding.
+</code></pre>
+<h3>InAppBilling.SECEXCEPTION <a href="read-only">int</a></h3>
+<pre><code>Security Exception state in Billing Service binding.
+</code></pre>
+<h3>InAppBilling.RESULT_OK <a href="read-only">int</a></h3>
+<pre><code> OK message from a Response Code notification.
+</code></pre>
+<h3>InAppBilling.RESULT_USER_CANCELED <a href="read-only">int</a></h3>
+<pre><code> User Canceled message from a Response Code notification.
+</code></pre>
+<h3>InAppBilling.RESULT_SERVICE_UNAVAILABLE<a href="read-only">int</a></h3>
+<pre><code> User Canceled message from a Response Code notification.
+</code></pre>
+<h3>InAppBilling.RESULT_BILLING_UNAVAILABLE<a href="read-only">int</a></h3>
+<pre><code> Billing Unavailable message from a Response Code notification.
+</code></pre>
+<h3>InAppBilling.RESULT_ITEM_UNAVAILABLE <a href="read-only">int</a></h3>
+<pre><code>Item Unavailable message from a Response Code notification.
+</code></pre>
+<h3>InAppBilling.RESULT_DEVELOPER_ERROR <a href="read-only">int</a></h3>
+<pre><code>Developer Error message from a Response Code notification.
+</code></pre>
+<h3>InAppBilling.RESULT_ERROR <a href="read-only">int</a></h3>
+<pre><code>Result Error message from a Response Code notification
+</code></pre>
+<h3>InAppBilling.SIGNATURE_VERIFIED <a href="read-only">int</a></h3>
+<pre><code>Success response from signature verification.
+</code></pre>
+<h3>InAppBilling.NULL_DATA <a href="read-only">int</a></h3>
+<pre><code>Null data response from signature verification (occurs if there is no signed data sent in
+Purchase State Changed notification).
+</code></pre>
+<h3>InAppBilling.SIGNATURE_ERROR <a href="read-only">int</a></h3>
+<pre><code>Error response from signature verification (occurs if the signature is incorrect and cannot
+be verified).
+</code></pre>
+<h3>InAppBilling.UNKNOWN_NONCE <a href="read-only">int</a></h3>
+<pre><code>Unknown Nonce response from signature verification (occurs if the nonce returned from the Market
+differs from any that have been sent, the message is thus insecure, see Android Documentation).
+</code></pre>
+<h3>InAppBilling.PUBLIC_KEY_NULL <a href="read-only">int</a></h3>
+<pre><code>Public Key null response from signature verification (occurs if setPublicKey has not been called).
+</code></pre>
+<h3>InAppBilling.ITEM_TYPE_INAPP <a href="read-only">string</a></h3>
+<pre><code>Used to set productType to a Standard in-app product.
+</code></pre>
+<h3>InAppBilling.ITEM_TYPE_SUBSCRIPTION <a href="read-only">string</a></h3>
+<pre><code>Used to set productType to a Recurring monthly or annual billing product.
+</code></pre>
+<h2>Events</h2>
+<h3>ON_BIND_EVENT</h3>
+<pre><code>Event e is fired when the Billing Service binds with the Market service, with the property e.result
+equal to one of the following:
+
+InAppBilling.SUCCESS
+InAppBilling.FAILED
+InAppBilling.SECEXCEPTION
+</code></pre>
+<h3>ON_CONNECT_EVENT</h3>
+<pre><code>Event e is fired when the Billing Service connects to the market. This event has no properties,
+but signifies that requests can now be made to the Android Market.
+</code></pre>
+<h3>NOTIFY_EVENT</h3>
+<pre><code>Event e is fired when the module receives an asynchronous IN_APP_NOTIFY response from the Market. This event has
+one property, e.notifyId. This ID can be used for calls to GetPurchaseInformation and confirmNotifications.
+</code></pre>
+<h3>PURCHASE_STATE_CHANGED_EVENT</h3>
+<pre><code>Event e is fired when the module receives an asynchronous PURCHASE_STATE_CHANGED response from the market.
+This event has 3 properties: first, e.signedData, a JSON String which can be parsed into a JSON object
+(see Android documentation: http://developer.android.com/guide/market/billing/billing_reference.html#billing-intents).
+Second, e.signature,  this can be used to verify the response received. If the Public Key has been set, 
+the module will verify automatically. Third, e.result, a int response with one the following possible values:
+
+InAppBilling.SIGNATURE_VERIFIED
+InAppBilling.NULL_DATA
+InAppBilling.SIGNATURE_ERROR 
+InAppBilling.UNKNOWN_NONCE
+InAppBilling.PUBLIC_KEY_NULL
+</code></pre>
+<h3>RESPONSE_EVENT</h3>
+<pre><code>Event e is fired both from receiving an asynchronous RESPONSE_CODE event and synchronously from each request method. 
+This event, has 3 properties: first, e.requestId, a double that provides a unique indicator of the response. Second, 
+e.responseCode, an int response with one of the following possible values:
+
+InAppBilling.RESULT_OK
+InAppBilling.RESULT_USER_CANCELED
+InAppBilling.RESULT_SERVICE_UNAVAILABLE       
+InAppBilling.RESULT_BILLING_UNAVAILABLE
+InAppBilling.RESULT_ITEM_UNAVAILABLE
+InAppBilling.RESULT_DEVELOPER_ERROR
+InAppBilling.RESULT_ERROR
+
+Third, e.sync, a boolean value that states whether the event was fired synchronously or not.
+</code></pre>
+<h1>Usage</h1>
+<p>See the <code>example</code> application and Android documentation. </p>
+<h2>Author</h2>
+<p>Developed for Appcelerator by Logical Labs
+Alexander Conway, Logical Labs</p>
+<h2>Module History</h2>
+<p>View the <a href="changelog.html">change log</a> for this module.</p>
+<h2>Feedback and Support</h2>
+<p>Please direct all questions, feedback, and concerns to <a href="mailto:info@appcelerator.com?subject=Android%20InAppBilling%20Module">info@appcelerator.com</a>.</p>
+<h2>License</h2>
+<p>Copyright(c) 2010-2012 by Appcelerator, Inc. All Rights Reserved. Please see the LICENSE file included in the distribution for further details.</p>

@@ -1,0 +1,17 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0
+description: In-App Billing Module
+author: Logical Labs
+license: Appcelerator Commercial License
+copyright: Copyright (c) 2010-2011 by Appcelerator,  Inc.
+
+
+# these should not be edited
+name: inappbilling
+moduleid: ti.inappbilling
+guid: 3bdb4cb3-765b-41cc-8268-d8deb35ece07
+platform: android
+minsdk: 1.7.0

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ti:module xmlns:ti="http://ti.appcelerator.org"
+           xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Similar to tiapp.xml, but contains module/platform specific configuration 
+            in <iphone> and <android> sections -->
+    <iphone>
+    </iphone>
+    <android xmlns:android="http://schemas.android.com/apk/res/android">
+        <manifest>
+            <uses-permission android:name="com.android.vending.BILLING"/>
+            <application>
+                <service android:name="ti.inappbilling.BillingService"></service>
+                <receiver android:name="ti.inappbilling.BillingReceiver">
+                    <intent-filter>
+                        <action android:name="com.android.vending.billing.IN_APP_NOTIFY"/>
+                        <action android:name="com.android.vending.billing.RESPONSE_CODE"/>
+                        <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED"/>
+                    </intent-filter>
+                </receiver>
+            </application>
+        </manifest>
+    </android>
+</ti:module>
